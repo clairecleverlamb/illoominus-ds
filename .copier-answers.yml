@@ -1,0 +1,6 @@
+# Changes here will be overwritten by Copier
+_commit: v1.1.5
+_src_path: gh:illoominus/ds-project-template
+description: Production data-science batch job.
+project_name: illoominus-ds
+project_slug: illoominus-ds

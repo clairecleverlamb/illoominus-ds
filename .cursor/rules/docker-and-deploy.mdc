@@ -1,0 +1,23 @@
+---
+description: Container and deployment hygiene for DS batch jobs
+globs: "{Dockerfile,docker-compose.yaml,.github/workflows/*.yml}"
+alwaysApply: false
+---
+
+# Docker and Deploy Rules
+
+- Keep Docker image minimal and reproducible.
+- Install only required system and R packages for current modules.
+- Use a three-stage Dockerfile: **base** (R + DuckDB R package and extensions only), **duckdb-shell** (base + CLI + init/entrypoint for interactive shell), **app** (base + R packages + COPY + CMD). The **app** stage is last so the default build target is the production image (CI that builds/pushes the final stage is safe).
+- Order Dockerfile layers to minimize rebuild time:
+  1) OS packages and toolchain
+  2) R repo config (P3M first, CRAN fallback)
+  3) DuckDB install and extension preload (`httpfs`, `json`, `aws`, `icu`) in base
+  4) In app stage: remaining R packages (install with `pak::pkg_install(...)`; avoid dependency-conflicting manual pins unless required)
+  5) App source `COPY` and runtime `CMD`
+- Keep `duckdb` in its own early layer in the base stage before other R packages.
+- Treat DuckDB + extension install as the cache boundary: Dockerfile additions/changes should be placed after this step unless they are required before it.
+- The duckdb-shell service builds with `target: duckdb-shell`; its init script uses runtime env substitution (placeholders `__S3_REGION__` / `__BASE_URL__`) so URL/region can be overridden without re-generating the project. Both the DuckDB CLI session and the R data-lake connection are read-only (no writes to the S3 data lake).
+- Ensure compose mounts `~/.aws:/root/.aws:ro` and sets `AWS_SDK_LOAD_CONFIG=1`.
+- Preserve `linux/amd64` build target in CI for ECR/ECS compatibility.
+- When templating GitHub Actions, escape `${{ ... }}` blocks in Jinja templates.

@@ -1,0 +1,36 @@
+services:
+  illoominus-ds:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: app
+    container_name: illoominus-ds
+    working_dir: /app
+    volumes:
+      - ./scripts:/app/scripts
+      - ./data:/app/data
+      - ~/.aws:/root/.aws:ro
+    environment:
+      - TZ=UTC
+      - AWS_SDK_LOAD_CONFIG=1
+
+  duckdb-shell:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: duckdb-shell
+    container_name: illoominus-ds-duckdb-shell
+    working_dir: /app
+    volumes:
+      - ./scripts:/app/scripts
+      - ./.duckdb_shell:/root/.duckdb_shell
+      - ~/.aws:/root/.aws:ro
+    environment:
+      - TZ=UTC
+      - AWS_SDK_LOAD_CONFIG=1
+      - DUCKDB_HISTORY=/root/.duckdb_shell/history
+      - DATA_LAKE_BASE_URL
+      - DATA_LAKE_S3_REGION
+    stdin_open: true
+    tty: true
+    entrypoint: ["/app/scripts/duckdb/duckdb_shell_entrypoint.sh"]

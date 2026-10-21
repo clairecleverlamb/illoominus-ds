@@ -1,0 +1,14 @@
+---
+description: Utility module and output IO patterns for R jobs
+globs: scripts/R/ds_utils.R
+alwaysApply: false
+---
+
+# Utility and IO Rules
+
+- Keep utilities composable and side-effect aware.
+- Maintain both local and S3 support for data and plot writes.
+- Keep `write_data_destination` and `save_plot_destination` behavior aligned.
+- Ensure temp-file cleanup in all error paths.
+- Keep CLI parsing and output-config helpers deterministic.
+- Favor explicit function arguments over hidden global state.

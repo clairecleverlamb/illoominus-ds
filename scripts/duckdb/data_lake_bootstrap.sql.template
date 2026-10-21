@@ -1,0 +1,12 @@
+-- Placeholders __S3_REGION__ and __BASE_URL__ are replaced at runtime from
+-- DATA_LAKE_S3_REGION and DATA_LAKE_BASE_URL (defaults: us-east-1, s3://illoominus-data-engineering/data-lake).
+LOAD aws;
+LOAD httpfs;
+LOAD icu;
+LOAD json;
+SET s3_region = '__S3_REGION__';
+CREATE OR REPLACE SECRET (
+  TYPE s3,
+  PROVIDER credential_chain,
+  CHAIN 'env;config;instance'
+);

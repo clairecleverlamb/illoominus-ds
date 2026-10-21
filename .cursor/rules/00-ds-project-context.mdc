@@ -1,0 +1,14 @@
+---
+description: Core conventions for generated DS projects
+alwaysApply: true
+---
+
+# DS Project Conventions
+
+- Prefer Docker-first workflows for running and testing jobs.
+- Keep `scripts/main.R` small and orchestration-focused.
+- Move reusable logic into modules under `scripts/R/`.
+- Preserve output contract: timestamped run folder plus `latest` copy.
+- Keep S3 and local output behavior functionally equivalent.
+- Prefer incremental, low-risk changes over broad rewrites.
+- Keep generated-project docs accurate with current compose and AWS credential mount behavior.

@@ -1,0 +1,9 @@
+.Rhistory
+.RData
+.Rproj.user/
+.DS_Store
+.idea/
+.vscode/
+
+data/outputs
+.duckdb_shell/

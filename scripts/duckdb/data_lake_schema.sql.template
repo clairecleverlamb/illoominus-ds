@@ -1,0 +1,49 @@
+-- Data-lake schema: views and per-company table macros. __BASE_URL__ is replaced at runtime.
+-- Add or edit views and macros here; both R (data_lake.R) and duckdb-shell use this file.
+CREATE OR REPLACE MACRO employees(company_id) AS TABLE
+SELECT * REPLACE (
+  CAST(remote_data AS JSON) AS remote_data,
+  CASE
+    WHEN department_ids IS NULL THEN NULL
+    ELSE list_transform(
+      regexp_extract_all(department_ids, '[0-9]+'),
+      x -> TRY_CAST(x AS BIGINT)
+    )
+  END AS department_ids,
+  CASE
+    WHEN reports_to_ids IS NULL THEN NULL
+    ELSE list_transform(
+      regexp_extract_all(reports_to_ids, '[0-9]+'),
+      x -> TRY_CAST(x AS BIGINT)
+    )
+  END AS reports_to_ids
+)
+FROM read_parquet('__BASE_URL__/' || company_id::VARCHAR || '/employees/latest.parquet');
+
+CREATE OR REPLACE MACRO departments(company_id) AS TABLE
+SELECT * REPLACE (CAST(remote_data AS JSON) AS remote_data)
+FROM read_parquet('__BASE_URL__/' || company_id::VARCHAR || '/departments/latest.parquet');
+
+CREATE OR REPLACE VIEW companies AS
+SELECT id AS company_id, legal_name, created_at, updated_at
+FROM read_parquet('__BASE_URL__/*/companies/latest.parquet')
+ORDER BY legal_name;
+CREATE OR REPLACE MACRO job_histories(company_id) AS TABLE
+SELECT * REPLACE (
+  CAST(remote_data AS JSON) AS remote_data,
+  CASE
+    WHEN department_ids IS NULL THEN NULL
+    ELSE list_transform(
+      regexp_extract_all(department_ids, '[0-9]+'),
+      x -> TRY_CAST(x AS BIGINT)
+    )
+  END AS department_ids,
+  CASE
+    WHEN reports_to_ids IS NULL THEN NULL
+    ELSE list_transform(
+      regexp_extract_all(reports_to_ids, '[0-9]+'),
+      x -> TRY_CAST(x AS BIGINT)
+    )
+  END AS reports_to_ids
+)
+FROM read_parquet('__BASE_URL__/' || company_id::VARCHAR || '/job_histories/latest.parquet');

@@ -1,0 +1,17 @@
+---
+description: Keep scripts/main.R as thin orchestrator
+globs: scripts/main.R
+alwaysApply: false
+---
+
+# Main Script Structure
+
+- `main.R` should focus on workflow orchestration only:
+  - setup logging and AWS credentials
+  - parse CLI args
+  - initialize DuckDB/data lake session
+  - iterate model execution
+  - write summary outputs
+- Avoid embedding heavy business logic directly in `main.R`.
+- Put reusable helpers in `scripts/R/ds_utils.R` or other modules.
+- Use explicit, structured log messages at each major step.

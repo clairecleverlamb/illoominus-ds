@@ -1,0 +1,15 @@
+---
+description: DuckDB + S3 data-lake access conventions
+globs: scripts/R/data_lake.R
+alwaysApply: false
+---
+
+# Data Lake Module Conventions
+
+- Bootstrap and schema live in shared SQL templates under `scripts/duckdb/`: `data_lake_bootstrap.sql.template` (extensions, secret) and `data_lake_schema.sql.template` (VIEW companies + per-company CREATE MACRO). Both R (`data_lake.R`) and the duckdb-shell entrypoint read and run these files so the CLI has the same views and macros as the R session.
+- `data_lake.R` reads the templates (via `here::here("scripts", "duckdb", ...)`), substitutes `__BASE_URL__` and `__S3_REGION__`, and executes via `dbExecute`; it does not embed SQL inline.
+- Default to credential-chain auth for S3 access in DuckDB.
+- Support environment overrides for base URL and region.
+- Keep query helpers small, predictable, and testable.
+- Add or edit views and macros in `scripts/duckdb/data_lake_schema.sql.template` only; avoid hardcoding project-specific table paths in R.
+- Prefer returning data frames with stable column names for downstream modules.
